@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using Telegram.Bot.Types.Enums;
+using Telegram.Bot.Types.ReplyMarkups;
 
 namespace UtilityBot.Controllers
 {
@@ -17,8 +20,27 @@ namespace UtilityBot.Controllers
 
         public async Task Handle(Message message, CancellationToken ct)
         {
-            Console.WriteLine($"Контроллер {GetType().Name} получил сообщение");
-            await _telegramClient.SendTextMessageAsync(message.Chat.Id, $"Получено текстовое сообщение", cancellationToken: ct);
+            switch (message.Text)
+            {
+                case "/start":
+
+                    // Объект, представляющий кноки
+                    var buttons = new List<InlineKeyboardButton[]>();
+                    buttons.Add(new[]
+                    {
+                        InlineKeyboardButton.WithCallbackData($" Сложить числа" , $"sum"),
+                        InlineKeyboardButton.WithCallbackData($" Сосчитать символы " , $"count")
+                    });
+
+                    // передаем кнопки вместе с сообщением (параметр ReplyMarkup)
+                    await _telegramClient.SendTextMessageAsync(message.Chat.Id, $"<b>  Наш бот обработчик сообщений.</b> {Environment.NewLine}" +
+                        $"{Environment.NewLine}Можно написать нам сообщение и мы сосчитаем сумму чисел или отправим вам количество символов.{Environment.NewLine}", cancellationToken: ct, parseMode: ParseMode.Html, replyMarkup: new InlineKeyboardMarkup(buttons));
+
+                    break;
+                default:
+                    await _telegramClient.SendTextMessageAsync(message.Chat.Id, "Отправьте текст", cancellationToken: ct);
+                    break;
+            }
         }
     }
 }
