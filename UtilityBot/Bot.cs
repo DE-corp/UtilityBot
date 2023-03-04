@@ -7,6 +7,7 @@ using Telegram.Bot.Exceptions;
 using Telegram.Bot.Polling;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using UtilityBot.Controllers;
 
 namespace UtilityBot
 {
@@ -14,9 +15,19 @@ namespace UtilityBot
     {
         private ITelegramBotClient _telegramClient;
 
-        public Bot(ITelegramBotClient telegramClient)
+        private InlineKeyboardController _inlineKeyboardController;
+        private TextMessageController _textMessageController;
+        private DefaultMessageController _defaultMessageController;
+
+        public Bot(ITelegramBotClient telegramClient,
+            InlineKeyboardController inlineKeyboardController,
+            TextMessageController textMessageController,
+            DefaultMessageController defaultMessageController)
         {
             _telegramClient = telegramClient;
+            _inlineKeyboardController = inlineKeyboardController;
+            _textMessageController = textMessageController;
+            _defaultMessageController = defaultMessageController;
         }
 
         protected override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -36,15 +47,22 @@ namespace UtilityBot
             //  Обрабатываем нажатия на кнопки 
             if (update.Type == UpdateType.CallbackQuery)
             {
-                await _telegramClient.SendTextMessageAsync(update.Message.Chat.Id, "Вы нажали кнопку", cancellationToken: cancellationToken);
+                await _inlineKeyboardController.Handle(update.CallbackQuery, cancellationToken);
                 return;
             }
 
             // Обрабатываем входящие сообщения 
             if (update.Type == UpdateType.Message)
             {
-                Console.WriteLine($"Получено сообщение {update.Message.Text}");
-                return;
+                switch (update.Message!.Type)
+                {
+                    case MessageType.Text:
+                        await _textMessageController.Handle(update.Message, cancellationToken);
+                        return;
+                    default:
+                        await _defaultMessageController.Handle(update.Message, cancellationToken);
+                        return;
+                }
             }
         }
 
