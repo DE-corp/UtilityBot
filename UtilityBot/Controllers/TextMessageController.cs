@@ -6,16 +6,19 @@ using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using UtilityBot.Services;
 
 namespace UtilityBot.Controllers
 {
     class TextMessageController
     {
         private readonly ITelegramBotClient _telegramClient;
+        private readonly IActionHandler _actionHandler;
 
-        public TextMessageController(ITelegramBotClient telegramBotClient)
+        public TextMessageController(ITelegramBotClient telegramBotClient, IActionHandler actionHandler)
         {
             _telegramClient = telegramBotClient;
+            _actionHandler = actionHandler;
         }
 
         public async Task Handle(Message message, CancellationToken ct)
@@ -38,7 +41,8 @@ namespace UtilityBot.Controllers
 
                     break;
                 default:
-                    await _telegramClient.SendTextMessageAsync(message.Chat.Id, "Отправьте текст", cancellationToken: ct);
+                    string result = _actionHandler.HandleAction(message);
+                    await _telegramClient.SendTextMessageAsync(message.Chat.Id, result, cancellationToken: ct);
                     break;
             }
         }

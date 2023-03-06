@@ -45,6 +45,7 @@ namespace UtilityBot
             services.AddTransient<InlineKeyboardController>();
 
             services.AddSingleton<IStorage, MemoryStorage>();
+            services.AddSingleton<IActionHandler, ActionHandler>();
 
             // Регистрируем объект TelegramBotClient c токеном подключения
             services.AddSingleton<ITelegramBotClient>(provider => new TelegramBotClient(appSettings.BotToken));
