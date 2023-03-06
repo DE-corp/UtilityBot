@@ -39,12 +39,12 @@ namespace UtilityBot.Services
                 result += int.Parse(item);
             }
 
-            return result.ToString();
+            return $"Сумма чисел: {result}";
         }
 
         string CharCount(string message)
         {
-            return message.Length.ToString();
+            return $"В вашем сообщении {message.Length} символов!";
         }
     }
 }
